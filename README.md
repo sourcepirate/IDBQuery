@@ -1,4 +1,5 @@
-IDBQuery
-========
+<center> <h1> IDB Query </h1> </center>
 
-Making SQL like Structure for IndexedDB
+Using SQL architecture for IndexedDB.
+
+
