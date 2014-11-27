@@ -2,6 +2,8 @@ function Table(name,idobj){
      
      var self=this;
      
+     this.ptr=0;//points to the current primary key.
+     
      self.name=name;
      if(idobj===undefined)
      {
@@ -56,6 +58,7 @@ function Table(name,idobj){
          }
          if(flag)
          {
+             data[self.key.name]=++self.ptr;
              self.values.push(data);
          }
          }
@@ -85,9 +88,11 @@ function Table(name,idobj){
      }
 };
 
-var table=new Table("order",{
-     name:"orderid",
-     type:"number",
-     autoincrement:false
+var table=new Table("order");
+table.addProperty({
+     name:"name",type:"number"
 });
-console.log(table.toString());
+table.put({name:1});
+table.put({name:2});
+table.put({name:"sathya"});
+console.log(table.values);
