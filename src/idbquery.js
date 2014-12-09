@@ -70,7 +70,7 @@ function Table(name,idobj){
      
      self.commit=function()
      {
-         //for inserting and creating indexed db;
+          
      }
      self.create=function()
      {
@@ -92,7 +92,8 @@ var table=new Table("order");
 table.addProperty({
      name:"name",type:"number"
 });
-table.put({name:1});
-table.put({name:2});
-table.put({name:"sathya"});
-console.log(table.values);
+table.addProperty({
+     name:"email",type:"string"
+})
+table.put({name:2,email:"Sathya@gmail.com"});
+
