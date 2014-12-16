@@ -1,4 +1,4 @@
-function DataDriver(name)
+function DataBase(dbname)
 {
     var self=this;
     
@@ -9,36 +9,27 @@ function DataDriver(name)
     self.version=2; //version is 2 if we want to override it we should user window.IDBDriver.version=desired value
     self.DB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
    // self.databases=[];
-    
+    self.dbname=dbname;
     /*
     Getting the database namelist and populating it and creating a database length
     */
-    
-    //validating the name of database
-    try
-    {
-    if(name.length!==undefined || typeof name!=="string")
-    {
-        throw name;
-    }
-    }
-    catch(e)
-    {
-        console.error(e +"is not a string");
-        return;
-    }
-    
-    self.request=self.DB.open(name,self.version);
-    
-    self.tables=[];
-    /*
-      Table object should be such that the schemas should be like this.
-      {name:tablename,key:"keyfieldname"}
-    */
-    self.createTables=function(Schemas)
-    {
-        
-        
-    }
-    
+
+        self.createStore=function(Schema)
+        {
+            var request=self.DB.open(self.dbname,self.version);
+            request.onsuccess=function(event)
+            {
+                var database=event.target.result;
+                var version=parseInt(database.version);
+                database.close();
+                var req=self.DB.open(self.dbname,version+1);
+                req.onupgradeneeded=function(event)
+                {
+                    var datbase=event.target.result;
+                    var fields=Schema.getAllFields();
+                }
+            }
+
+        }
+
 }
