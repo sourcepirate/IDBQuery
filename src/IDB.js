@@ -1,5 +1,6 @@
 
 window.tables=[];
+var dbname="something";
 
 function Property(name,type)
 {
@@ -82,7 +83,9 @@ Table.prototype={
     	{
     	if(table.getPrimaryKey())
     	{
-    		this.properties.push(table.getPrimaryKey());
+    		var t=Object.create(table.getPrimaryKey());
+    		t.relation="foreign";
+    		this.properties.push(t);
     	}
     	else
     	{
@@ -200,19 +203,32 @@ function Schema(data)
     	}
     	return true;
     })(self.data);
+    /*
+    Adding Primary Key if does not -exist
+    */
+
+    if(!self.tabel.getPrimaryKey())
+    {
+       var primarykey=new Property(self.tabel.name+"_id","number");
+       primarykey.setKey(true);
+       self.tabel.add(primarykey);
+    }
+
     window.tables.push(self.tabel);
     console.log(self.tabel);
 
+    self.persist=function()
+    {
+     var database=new DataBase("test");
+	 database.createStore(self);
+    }
 }
 
 var dump={
 	name:"person",
-	properties:[
-	{name:"person_id",type:"number",key:true}
-	]
+	properties:[]
 }
 var sce=new Schema(dump);
-
 var data=
 {
 	name:"user",
@@ -229,4 +245,6 @@ var data=
 
 var scheme=new Schema(data);
 
+var database=new DataBase("test");
+database.CreateSchemas([sce,scheme]);
 
