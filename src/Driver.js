@@ -25,8 +25,9 @@ function DataBase(dbname)
                 var req=self.DB.open(self.dbname,version+1);
                 req.onupgradeneeded=function(event)
                 {
-                    var datbase=event.target.result;
+                    var database=event.target.result;
                     var fields=Schema.getAllFields();
+                    console.log(fields);
                 }
             }
 
