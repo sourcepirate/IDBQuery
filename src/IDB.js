@@ -216,12 +216,17 @@ function Schema(data)
 
     window.tables.push(self.tabel);
     console.log(self.tabel);
+}
 
-    self.persist=function()
-    {
-     var database=new DataBase("test");
-	 database.createStore(self);
-    }
+Schema.prototype.Persist=function()
+{
+	var database=new DataBase("test");
+	database.createStore(this);
+}
+
+Schema.prototype.save=function(data)
+{
+
 }
 
 var dump={
@@ -244,7 +249,5 @@ var data=
 };
 
 var scheme=new Schema(data);
-
-var database=new DataBase("test");
-database.CreateSchemas([sce,scheme]);
-
+var db=new DataBase("test");
+db.CreateSchemas([scheme,sce]);

@@ -58,50 +58,19 @@ function DataBase(dbname)
             {
                 var database=event.target.result;
                 var version=parseInt(database.version);
-                console.log(self.version);
+                console.log(version);
                 database.close();
-                self.version=self.version+1;
                 var req=self.DB.open(self.dbname,version+1);
                 console.log(version+1);
                 req.onupgradeneeded=function(event)
                 {
                     var db=event.target.result;
-                    
-                    if(Schema.hasOwnProperty('length'))
-                    {
-                        Schema.forEach(function(entity){
-                            var store=db.createObjectStore(entity.tabel.name,{
-                            keyPath:Schema.tabel.getPrimaryKey().name
-                            });
-                            entity.tabel.properties.forEach(function(prop){
-                            if(prop.key)
-                            {
-                            store.createIndex(prop.name,prop.name,{unique:true});
-                            }
-                            else
-                            {
+                    Schema.forEach(function(scheme){
+                        var store=db.createObjectStore(scheme.tabel.name,{keyPath:scheme.tabel.getPrimaryKey().name});
+                        scheme.tabel.properties.forEach(function(prop){
                             store.createIndex(prop.name,prop.name,{unique:false});
-                            }
-                           });
-                               
                         });
-                    }
-                    else
-                    {
-                    var store=db.createObjectStore(Schema.tabel.name,{
-                        keyPath:Schema.tabel.getPrimaryKey().name
-                    });
-                    Schema.tabel.properties.forEach(function(prop){
-                        if(prop.key)
-                        {
-                        store.createIndex(prop.name,prop.name,{unique:true});
-                        }
-                        else
-                        {
-                        store.createIndex(prop.name,prop.name,{unique:false});
-                        }
-                    });
-                   }
+                    })
                 }
                 req.onsuccess=function(event)
                 {
