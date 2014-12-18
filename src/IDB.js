@@ -58,10 +58,11 @@ function Table(name)
 	this.name=name;
 	this.properties=[];
 	this.foreignKeys=[];
-        this.values=[];
+    this.values=[];
 }
 
 Table.prototype={
+    current:0,
     add:function(property)
     {
     	this.properties.push(property);
@@ -102,10 +103,36 @@ Table.prototype={
     {
     	console.log(this.name+" "+this.properties+" "+this.foreignKeys+" "+this.values);
     },
-    put:function(value){
+    put:function(data){
        /*
         * validate the data being sent
         */
+        try
+        {
+        var flag=false;
+        var pts=this.properties;
+        for(var key in data)
+        {
+            pts.forEach(function(property){
+                if(key===property.name)
+                {
+                    if(property.type===typeof data[key])
+                    {
+                        flag=true;
+                    }
+                    else
+                    {
+                        throw data;
+                    }
+                }
+            });
+        }
+        }
+        catch(e)
+        {
+            console.log(e);
+
+        }
     }
 }
 
@@ -323,7 +350,7 @@ DataBase.prototype={
     },
     Save:function(tablename,data)
     {
-        
+
     }
 }
 
