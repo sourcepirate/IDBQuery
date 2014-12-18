@@ -58,6 +58,7 @@ function Table(name)
 	this.name=name;
 	this.properties=[];
 	this.foreignKeys=[];
+        this.values=[];
 }
 
 Table.prototype={
@@ -99,27 +100,15 @@ Table.prototype={
     },
     toString:function()
     {
-    	console.log(this.name+" "+this.properties+" "+this.foreignKeys);
+    	console.log(this.name+" "+this.properties+" "+this.foreignKeys+" "+this.values);
+    },
+    put:function(value){
+       /*
+        * validate the data being sent
+        */
     }
 }
 
-
-/*
-JSON data to convert table to schema
-{
-	name:"user",
-	properties:
-	[
-	{name:"person",type:"string"},
-	{name:"age",type:"number"},
-	{name:"person_id",type:"number",auto:true,key:true}
-	]
-	foreignKeys:[
-	{
-		name:"tablename"
-	}]
-}
-*/
 function Schema(data)
 {
 	var self=this;
@@ -218,36 +207,134 @@ function Schema(data)
     console.log(self.tabel);
 }
 
-Schema.prototype.Persist=function()
+
+
+//var dump={
+//	name:"person",
+//	properties:[]
+//}
+//var sce=new Schema(dump);
+//var data=
+//{
+//	name:"user",
+//	properties:
+//	[
+//	{name:"username",type:"string"},
+//	{name:"age",type:"number"},
+//	{name:"user_id",type:"number",auto:true,key:true}
+//	],
+//	foreignKeys:[
+//       {name:"person"}
+//	]
+//};
+//
+//var scheme=new Schema(data);
+//var db=new DataBase("test");
+//db.CreateSchemas([scheme,sce]);
+function DataBase(dbname)
 {
-	var database=new DataBase("test");
-	database.createStore(this);
+    var self=this;
+    
+    if(window.IDBDriver===undefined)
+    {
+      window.IDBDriver=this;
+    }
+    self.version=2; //version is 2 if we want to override it we should user window.IDBDriver.version=desired value
+    self.DB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    //self.databases=[];
+    self.dbname=dbname;
+    /*
+     *Tables hold the schema object 
+     *
+     */
+    this.tables=[];
+    /*
+    Getting the database namelist and populating it and creating a database length
+    */
+    this.createSchemas=function()
+    {
+        var Schema=self.tables;
+         var request=self.DB.open(self.dbname,self.version);
+
+            request.onsuccess=function(event)
+            {
+                var database=event.target.result;
+                var version=parseInt(database.version);
+                console.log(version);
+                database.close();
+                var req=self.DB.open(self.dbname,version+1);
+                console.log(version+1);
+                req.onupgradeneeded=function(event)
+                {
+                    var db=event.target.result;
+                    if(Schema.hasOwnProperty('length'))
+                    {
+                    Schema.forEach(function(scheme){
+                        var store=db.createObjectStore(scheme.tabel.name,{keyPath:scheme.tabel.getPrimaryKey().name});
+                        scheme.tabel.properties.forEach(function(prop){
+                            if(!prop.key)
+                            {
+                            store.createIndex(prop.name,prop.name,{unique:false});
+                            }
+                            else
+                            {
+                            store.createIndex(prop.name,prop.name,{unique:true});
+                            }
+                        });
+                    });
+                   }
+                   else
+                   {
+                       var store=db.createObjectStore(Schema.tabel.name,{keyPath:Schema.tabel.getPrimaryKey().name});
+                       Schema.tabel.forEach(function(prop){
+                          if(!prop.key)
+                            {
+                            store.createIndex(prop.name,prop.name,{unique:false});
+                            }
+                            else
+                            {
+                            store.createIndex(prop.name,prop.name,{unique:true});
+                            }
+                       });
+                   }
+                }
+                req.onsuccess=function(event)
+                {
+                    event.target.result.close();
+                }
+            }         
+
+    }
+
 }
 
-Schema.prototype.save=function(data)
-{
-
+DataBase.prototype={
+    addTable:function(tabledata){
+        var schema=new Schema(tabledata);
+        this.tables.push(schema);
+    },
+    //Initialize function is used to convert the all the schema to table data
+    Initialize:function(){
+       this.createSchemas();
+    },
+    
+    OnSave:function(tablename,data){
+        
+    },
+    Save:function(tablename,data)
+    {
+        
+    }
 }
 
 var dump={
 	name:"person",
-	properties:[]
+	properties:[
+            {name:"person_name",type:"string"}
+        ]
 }
-var sce=new Schema(dump);
-var data=
-{
-	name:"user",
-	properties:
-	[
-	{name:"username",type:"string"},
-	{name:"age",type:"number"},
-	{name:"user_id",type:"number",auto:true,key:true}
-	],
-	foreignKeys:[
-       {name:"person"}
-	]
-};
 
-var scheme=new Schema(data);
-var db=new DataBase("test");
-db.CreateSchemas([scheme,sce]);
+var db=new DataBase("testbase");
+
+db.addTable(dump);
+db.Initialize();

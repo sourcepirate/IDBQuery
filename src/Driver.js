@@ -11,47 +11,16 @@ function DataBase(dbname)
     //self.databases=[];
     self.dbname=dbname;
     /*
+     *Tables hold the schema object 
+     *
+     */
+    self.tables=[];
+    /*
     Getting the database namelist and populating it and creating a database length
     */
-
-        self.createStore=function(Schema)
-        {
-            var request=self.DB.open(self.dbname,self.version);
-
-            request.onsuccess=function(event)
-            {
-                var database=event.target.result;
-             //  var version=parseInt(database.version);
-                console.log(self.version);
-                database.close();
-                var req=self.DB.open(self.dbname,self.version+1);
-                req.onupgradeneeded=function(event)
-                {
-                    var db=event.target.result;
-                    var store=db.createObjectStore(Schema.tabel.name,{
-                        keyPath:Schema.tabel.getPrimaryKey().name
-                    });
-                    Schema.tabel.properties.forEach(function(prop){
-                        if(prop.key)
-                        {
-                        store.createIndex(prop.name,prop.name,{unique:true});
-                        }
-                        else
-                        {
-                        store.createIndex(prop.name,prop.name,{unique:false});
-                        }
-                    });
-                }
-                req.onsuccess=function(event)
-                {
-                    event.target.result.close();
-                }
-            }         
-
-        }
-
-    self.CreateSchemas=function(Schema)
+    self.CreateSchemas=function()
     {
+        var Schema=self.tables;
          var request=self.DB.open(self.dbname,self.version);
 
             request.onsuccess=function(event)
@@ -65,12 +34,36 @@ function DataBase(dbname)
                 req.onupgradeneeded=function(event)
                 {
                     var db=event.target.result;
+                    if(Schema.hasOwnProperty('length'))
+                    {
                     Schema.forEach(function(scheme){
                         var store=db.createObjectStore(scheme.tabel.name,{keyPath:scheme.tabel.getPrimaryKey().name});
                         scheme.tabel.properties.forEach(function(prop){
+                            if(!prop.key)
+                            {
                             store.createIndex(prop.name,prop.name,{unique:false});
+                            }
+                            else
+                            {
+                            store.createIndex(prop.name,prop.name,{unique:true});
+                            }
                         });
-                    })
+                    });
+                   }
+                   else
+                   {
+                       var store=db.createObjectStore(Schema.tabel.name,{keyPath:Schema.tabel.getPrimaryKey().name});
+                       Schema.tabel.forEach(function(prop){
+                          if(!prop.key)
+                            {
+                            store.createIndex(prop.name,prop.name,{unique:false});
+                            }
+                            else
+                            {
+                            store.createIndex(prop.name,prop.name,{unique:true});
+                            }
+                       });
+                   }
                 }
                 req.onsuccess=function(event)
                 {
@@ -80,4 +73,12 @@ function DataBase(dbname)
 
     }
 
+}
+
+DataBase.prototype={
+    addTable:function(tabledata){
+        var schema=new Schema(tabledata);
+        self.tables.push(schema);
+    },
+    
 }

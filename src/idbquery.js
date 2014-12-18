@@ -214,3 +214,6 @@ var dumptwo={
 var schema=new Schema(dumpdata);
 var schema2=new Schema(dumptwo);
 
+var database=new DataBase("test");
+database.CreateSchemas([schema,schema2]);
+
