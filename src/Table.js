@@ -76,7 +76,7 @@ Table.prototype={
         }
         if(flag)
         {
-             self.values.push(data);
+             this.values.push(data);
         }
         }
         catch(e)
@@ -84,5 +84,5 @@ Table.prototype={
             console.log(e);
 
         }
-    }
+    },
 }
