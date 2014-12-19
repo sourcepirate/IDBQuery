@@ -103,9 +103,8 @@ DataBase.prototype={
     },
     Save:function(tablename,data)
     {
-        // var event;
-        // event.tablename=tablename;
-        // event.addedData=data;
+        // 
+
         //codes goes here.
         try
         {
@@ -115,6 +114,7 @@ DataBase.prototype={
         }
         catch(e)
         {
+            console.error(e);
             console.log("Error Commiting to database");
         }
         //save goes here
