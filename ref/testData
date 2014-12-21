@@ -3,8 +3,19 @@ var dump={
 	name:"person",
 	properties:[
             {name:"person_name",type:"string"}
+        ],
+        foreignKeys:[
+          {name:"user"}
         ]
 };
+var newdump={
+   name:"user",
+   properties:[
+     {name:"user_id",type:"string",key:true},
+     {name:"username",type:"string"}
+   ]
+};
+db.addTable(newdump);
 db.addTable(dump);
 db.Initialize();
 db.OnSave=function(event)

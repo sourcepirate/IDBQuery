@@ -109,16 +109,21 @@ DataBase.prototype={
         try
         {
         var table=this.getTable(tablename);
-        console.log(table.getPrimaryKey());
-        if(!(table.getPrimaryKey().name in data))
+        var name=table.getPrimaryKey().name;
+         if(!(name in data))
         {
-           data[table.getPrimaryKey().name]=table.currentptr+1;
+           data[name]=table.currentptr+1;
+           console.log("at if");
            table.currentptr=table.currentptr+1;
         }
         else
         {
-          if(data[table.getPrimaryKey().name]>table.currentptr+1 || data[table.getPrimaryKey().name]<table.currentptr-1 ){
+            console.log("at else");
+            
+          if(data[name]>table.currentptr+1 || data[name]<table.currentptr-1 ){
+             console.log("at else if");
              data[table.getPrimaryKey().name]=table.currentptr+1;
+              table.currentptr=table.currentptr+1;
           }
         }
         customobj["data"]=data;
