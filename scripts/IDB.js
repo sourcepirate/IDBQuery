@@ -29,7 +29,8 @@ function DataBase(dbname)
                 var version=parseInt(database.version);
                 console.log(version);
                 database.close();
-                var req=self.DB.open(self.dbname,version+1);
+                self.version=self.version+1;
+                var req=self.DB.open(self.dbname,version+1);          
                 console.log(version+1);
                 req.onupgradeneeded=function(event)
                 {
@@ -103,12 +104,24 @@ DataBase.prototype={
     },
     Save:function(tablename,data)
     {
-        // 
-
-        //codes goes here.
+        var customobj={};
+        customobj["eventorigin"]=tablename;
         try
         {
         var table=this.getTable(tablename);
+        console.log(table.getPrimaryKey());
+        if(!(table.getPrimaryKey().name in data))
+        {
+           data[table.getPrimaryKey().name]=table.currentptr+1;
+           table.currentptr=table.currentptr+1;
+        }
+        else
+        {
+          if(data[table.getPrimaryKey().name]>table.currentptr+1 || data[table.getPrimaryKey().name]<table.currentptr-1 ){
+             data[table.getPrimaryKey().name]=table.currentptr+1;
+          }
+        }
+        customobj["data"]=data;
         table.put(data);
         this.Store(table.name);
         }
@@ -118,27 +131,19 @@ DataBase.prototype={
             console.log("Error Commiting to database");
         }
         //save goes here
-        this.OnSave(event);
+       this.OnSave(customobj);
     },
     Store:function(tablename)
     {
-        var dbname=self.dbname;
-        self.version=self.version;
         var table=this.getTable(tablename);
-        var request=self.DB.open(dbname,self.version);
-        request.onerror=function(error){
-            console.log("Error Occured While Opening the Table "+e);
-        };
-        request.onsuccess=function(event)
-        {
-            var db=event.target.result;
-            var transaction=self.DB.transaction(tablename,"readwrite");
-            var store=transaction.objectStore(tablename);
-            while(table.values.length>0)
-            {
-                store.add(table.values.shift());
-            }
-        }
+        console.log("Storing on "+this.version+"of database");
+       while(table.values.length>0)
+       {
+           var util=new Util(this.dbname,tablename,this.version);
+           var data=table.values.shift();
+           console.log(data);
+           util.add(data);
+       }
     }
 }
 
@@ -293,7 +298,8 @@ function Table(name)
 	this.name=name;
 	this.properties=[];
 	this.foreignKeys=[];
-    this.values=[];
+        this.values=[];
+        this.currentptr=0;
 }
 
 Table.prototype={
@@ -373,4 +379,33 @@ Table.prototype={
 
         }
     },
+};
+function Util(dbname,tablename,version)
+{
+    this.dbname=dbname;
+    this.tablename=tablename;
+    this.version=version;
+}
+
+Util.prototype.add=function(data)
+{
+    console.log("the current version of database is "+this.version);
+    var datatobe=data;
+    var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    var request=indexDB.open(this.dbname,this.version);
+    var tablename=this.tablename;
+    request.onerror=function(event){
+        console.error("error opening the database");
+    }
+    request.onsuccess=function(event){
+        var db=event.target.result;
+        var transaction=db.transaction(tablename,"readwrite");
+        var store=transaction.objectStore(tablename);
+        store.put(datatobe);
+    }
+}
+
+Util.prototype.read=function()
+{
+    
 }

@@ -5,7 +5,8 @@ function Table(name)
 	this.name=name;
 	this.properties=[];
 	this.foreignKeys=[];
-    this.values=[];
+        this.values=[];
+        this.currentptr=0;
 }
 
 Table.prototype={

@@ -1,0 +1,17 @@
+var db=new DataBase("testbase");
+var dump={
+	name:"person",
+	properties:[
+            {name:"person_name",type:"string"}
+        ]
+};
+db.addTable(dump);
+db.Initialize();
+db.OnSave=function(event)
+{
+console.log(event.eventorigin);
+}
+db.Save("person",{person_id:1,person_name:"hello"});
+
+
+
