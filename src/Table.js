@@ -5,8 +5,8 @@ function Table(name)
 	this.name=name;
 	this.properties=[];
 	this.foreignKeys=[];
-        this.values=[];
-        this.currentptr=0;
+    this.values=[];
+    this.currentptr=0;
 }
 
 Table.prototype={
@@ -35,6 +35,8 @@ Table.prototype={
     	{
     		var t=Object.create(table.getPrimaryKey());
     		t.relation="foreign";
+            t.complement=false;
+            t.isAuto=false;
     		this.properties.push(t);
     	}
     	else
@@ -77,7 +79,7 @@ Table.prototype={
         }
         if(flag)
         {
-             this.values.push(data);
+            this.values.push(data);
         }
         }
         catch(e)
@@ -86,4 +88,14 @@ Table.prototype={
 
         }
     },
+    getForeignKeys:function()
+    {
+        var keycollection=[];
+        this.foreignKeys.forEach(function(key){
+            var obj={};
+            obj[key.getPrimaryKey().name]=key.name;
+            keycollection.push(obj);
+        });
+        return keycollection;
+    }
 }

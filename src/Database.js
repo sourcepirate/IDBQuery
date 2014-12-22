@@ -104,6 +104,8 @@ DataBase.prototype={
     },
     Save:function(tablename,data)
     {
+        var dbname=this.dbname;
+        var version=this.version;
         var customobj={};
         customobj["eventorigin"]=tablename;
         try
@@ -126,10 +128,42 @@ DataBase.prototype={
               table.currentptr=table.currentptr+1;
           }
         }
-        customobj["data"]=data;
-        console.log(data);
-        table.put(data);
-        this.Store(table.name);
+        //checking for foreign keys
+        var util;
+        var foreignkey=table.getForeignKeys();
+        if(foreignkey.length>0)
+        {
+            for(var index in foreignkey)
+            {
+            for(var key in foreignkey[index])
+            {
+                util=new Util(dbname,foreignkey[index][key], version);
+                var def=util.isThere(data[key]);
+            }
+            }
+            setTimeout(function(){      
+            if(util.flag)
+            { 
+            customobj["data"]=data;
+            console.log(data);
+            table.put(data);
+            self.Store(table.name);
+            self.OnSave(customobj);
+            }
+            else
+            {
+                throw data;
+            }
+            },100);
+        }
+        else
+        {
+            customobj["data"]=data;
+            console.log(data);
+            table.put(data);
+            self.Store(table.name);
+            self.OnSave(customobj); 
+        }
         }
         catch(e)
         {
@@ -137,7 +171,7 @@ DataBase.prototype={
             console.log("Error Commiting to database");
         }
         //save goes here
-       this.OnSave(customobj);
+       // this.OnSave(customobj);
     },
     Store:function(tablename)
     {

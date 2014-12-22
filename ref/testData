@@ -11,7 +11,7 @@ var dump={
 var newdump={
    name:"user",
    properties:[
-     {name:"user_id",type:"string",key:true},
+     {name:"user_id",type:"number",key:true},
      {name:"username",type:"string"}
    ]
 };
@@ -36,4 +36,5 @@ db.addTable({
 db.Initialize();
 
 
-
+db.Save("user",{user_id:1,username:"hello"});
+db.Save("person",{person_id:1,person_name:"hehllo",user_id:1});

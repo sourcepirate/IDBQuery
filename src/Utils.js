@@ -5,6 +5,7 @@ function Util(dbname,tablename,version)
     this.tablename=tablename;
     this.version=version;
     this.results=[];
+    this.flag=false;
 }
 
 Util.prototype.add=function(data)
@@ -32,27 +33,10 @@ Util.prototype.read=function(tablename,columnname,offset)
    var tablename=this.tablename;
    var result=[];
    var value=0;
-   request.onerror=function(event)
-   {
-       console.error("error opening the database for reading");
-   }
-   request.onsuccess=function(event){
-       var db=event.target.result;
-       var transaction=db.transaction(tablename,"readwrite");
-       var Store=transaction.objectStore(tablename);
-       Store.openCursor().onsuccess=function(event){
-           var cursor=event.target.result;
-           if(cursor){
-               if(columnname===undefined){
-                   
-               }
-               else
-               {
-                   
-               }
-           }
-       }
-   }
+}
+Util.prototype.readColoumn=function(tablename,columnname)
+{
+
 }
 Util.prototype.onDataAdded=function()
 {
@@ -86,8 +70,40 @@ Util.prototype.GetAll=function(tablename)
            else
            {
                //do nothing
+               console.log("cursor has done");
                callback();
            }
        }
    }
+}
+//check whether the give primary key is there are not.
+Util.prototype.isThere=function(id)
+{
+    var val;
+    var self=this;
+    var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    var request=indexDB.open(this.dbname,this.version);
+    var tablename=this.tablename;
+    request.onerror=function(event)
+    {
+      console.log("error opening the database");
+    }
+    request.onsuccess=function(event)
+    {
+      var db=event.target.result;
+      var transaction=db.transaction(tablename,"readwrite");
+      var Store=transaction.objectStore(tablename);
+      val=Store.get(id);
+    }
+    setTimeout(function(){
+      if(val.result!==undefined){
+        self.flag=true;
+
+      }
+      else
+      {
+        self.flag=false;
+
+      }
+    },100);
 }

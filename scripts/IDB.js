@@ -104,6 +104,9 @@ DataBase.prototype={
     },
     Save:function(tablename,data)
     {
+        var dbname=this.dbname;
+        var version=this.version;
+        var self=this;
         var customobj={};
         customobj["eventorigin"]=tablename;
         try
@@ -126,10 +129,42 @@ DataBase.prototype={
               table.currentptr=table.currentptr+1;
           }
         }
-        customobj["data"]=data;
-        console.log(data);
-        table.put(data);
-        this.Store(table.name);
+        //checking for foreign keys
+        var util;
+        var foreignkey=table.getForeignKeys();
+        if(foreignkey.length>0)
+        {
+            for(var index in foreignkey)
+            {
+            for(var key in foreignkey[index])
+            {
+                util=new Util(dbname,foreignkey[index][key], version);
+                var def=util.isThere(data[key]);
+            }
+            }
+            setTimeout(function(){      
+            if(util.flag)
+            { 
+            customobj["data"]=data;
+            console.log(data);
+            table.put(data);
+            self.Store(table.name);
+            self.OnSave(customobj);
+            }
+            else
+            {
+                throw data;
+            }
+            },100);
+        }
+        else
+        {
+            customobj["data"]=data;
+            console.log(data);
+            table.put(data);
+            self.Store(table.name);
+            self.OnSave(customobj); 
+        }
         }
         catch(e)
         {
@@ -137,7 +172,7 @@ DataBase.prototype={
             console.log("Error Commiting to database");
         }
         //save goes here
-       this.OnSave(customobj);
+       // this.OnSave(customobj);
     },
     Store:function(tablename)
     {
@@ -304,8 +339,8 @@ function Table(name)
 	this.name=name;
 	this.properties=[];
 	this.foreignKeys=[];
-        this.values=[];
-        this.currentptr=0;
+    this.values=[];
+    this.currentptr=0;
 }
 
 Table.prototype={
@@ -334,6 +369,8 @@ Table.prototype={
     	{
     		var t=Object.create(table.getPrimaryKey());
     		t.relation="foreign";
+            t.complement=false;
+            t.isAuto=false;
     		this.properties.push(t);
     	}
     	else
@@ -376,7 +413,7 @@ Table.prototype={
         }
         if(flag)
         {
-             this.values.push(data);
+            this.values.push(data);
         }
         }
         catch(e)
@@ -385,6 +422,16 @@ Table.prototype={
 
         }
     },
+    getForeignKeys:function()
+    {
+        var keycollection=[];
+        this.foreignKeys.forEach(function(key){
+            var obj={};
+            obj[key.getPrimaryKey().name]=key.name;
+            keycollection.push(obj);
+        });
+        return keycollection;
+    }
 };
 function Util(dbname,tablename,version)
 {
@@ -392,6 +439,7 @@ function Util(dbname,tablename,version)
     this.tablename=tablename;
     this.version=version;
     this.results=[];
+    this.flag=false;
 }
 
 Util.prototype.add=function(data)
@@ -419,27 +467,10 @@ Util.prototype.read=function(tablename,columnname,offset)
    var tablename=this.tablename;
    var result=[];
    var value=0;
-   request.onerror=function(event)
-   {
-       console.error("error opening the database for reading");
-   }
-   request.onsuccess=function(event){
-       var db=event.target.result;
-       var transaction=db.transaction(tablename,"readwrite");
-       var Store=transaction.objectStore(tablename);
-       Store.openCursor().onsuccess=function(event){
-           var cursor=event.target.result;
-           if(cursor){
-               if(columnname===undefined){
-                   
-               }
-               else
-               {
-                   
-               }
-           }
-       }
-   }
+}
+Util.prototype.readColoumn=function(tablename,columnname)
+{
+
 }
 Util.prototype.onDataAdded=function()
 {
@@ -473,8 +504,68 @@ Util.prototype.GetAll=function(tablename)
            else
            {
                //do nothing
+               console.log("cursor has done");
                callback();
            }
        }
    }
+}
+//check whether the give primary key is there are not.
+Util.prototype.isThere=function(id)
+{
+    var val;
+    var self=this;
+    var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    var request=indexDB.open(this.dbname,this.version);
+    var tablename=this.tablename;
+    request.onerror=function(event)
+    {
+      console.log("error opening the database");
+    }
+    request.onsuccess=function(event)
+    {
+      var db=event.target.result;
+      var transaction=db.transaction(tablename,"readwrite");
+      var Store=transaction.objectStore(tablename);
+      val=Store.get(id);
+    }
+    setTimeout(function(){
+      if(val.result!==undefined){
+        self.flag=true;
+
+      }
+      else
+      {
+        self.flag=false;
+
+      }
+    },100);
+}
+;function Deferred(){
+  this._done = [];
+  this._fail = [];
+}
+Deferred.prototype = {
+  execute: function(list, args){
+    var i = list.length;
+   console.log(list);
+    // convert arguments to an array
+    // so they can be sent to the
+    // callbacks via the apply method
+    args = Array.prototype.slice.call(args);
+    console.log(args);
+    while(i--) list[i].apply(null, args);
+  },
+  resolve: function(){
+    this.execute(this._done, arguments);
+  },
+  reject: function(){
+    this.execute(this._fail, arguments);
+  }, 
+  done: function(callback){
+    this._done.push(callback);
+  },
+  fail: function(callback){
+    this._fail.push(callback);
+  }  
 }
