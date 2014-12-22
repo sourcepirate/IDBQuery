@@ -25,4 +25,15 @@ console.log(event.eventorigin);
 db.Save("person",{person_id:1,person_name:"hello"});
 
 
+var db=new DataBase("test");
+db.addTable({
+   name:"user",
+   properties:[
+     {name:"user_id",type:"number",key:true},
+     {name:"username",type:"string"}
+   ]
+});
+db.Initialize();
+
+
 

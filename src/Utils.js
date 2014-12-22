@@ -61,6 +61,7 @@ Util.prototype.onDataAdded=function()
 
 Util.prototype.GetAll=function(tablename)
 {
+    this.results=[];
     var result=this.results;
     var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
     var request=indexDB.open(this.dbname,this.version);
@@ -81,7 +82,6 @@ Util.prototype.GetAll=function(tablename)
            {
                result.push(cursor.value);  
                cursor.continue();
-              
            }
            else
            {

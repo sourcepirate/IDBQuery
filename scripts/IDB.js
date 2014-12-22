@@ -120,13 +120,14 @@ DataBase.prototype={
         {
             console.log("at else");
             
-          if(data[name]>table.currentptr+1 || data[name]<table.currentptr-1 ){
+          if(data[name]>=table.currentptr+1 || data[name]<=table.currentptr-1 ){
              console.log("at else if");
-             data[table.getPrimaryKey().name]=table.currentptr+1;
+             data[name]=table.currentptr+1;
               table.currentptr=table.currentptr+1;
           }
         }
         customobj["data"]=data;
+        console.log(data);
         table.put(data);
         this.Store(table.name);
         }
@@ -447,6 +448,7 @@ Util.prototype.onDataAdded=function()
 
 Util.prototype.GetAll=function(tablename)
 {
+    this.results=[];
     var result=this.results;
     var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
     var request=indexDB.open(this.dbname,this.version);
@@ -467,7 +469,6 @@ Util.prototype.GetAll=function(tablename)
            {
                result.push(cursor.value);  
                cursor.continue();
-              
            }
            else
            {
