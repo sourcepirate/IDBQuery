@@ -9,7 +9,7 @@ module.exports=function(grunt)
       },
       my_target:{
           files:{
-            'scripts/IDB.js':['src/*.js']
+            'scripts/IDB.min.js':['src/*.js']
           }
       }
     },

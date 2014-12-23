@@ -107,6 +107,7 @@ DataBase.prototype={
         var dbname=this.dbname;
         var version=this.version;
         var customobj={};
+        var self=this;
         customobj["eventorigin"]=tablename;
         try
         {
@@ -167,7 +168,7 @@ DataBase.prototype={
         }
         catch(e)
         {
-            console.error(e);
+            console.error(e.toString());
             console.log("Error Commiting to database");
         }
         //save goes here

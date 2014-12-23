@@ -106,8 +106,8 @@ DataBase.prototype={
     {
         var dbname=this.dbname;
         var version=this.version;
-        var self=this;
         var customobj={};
+        var self=this;
         customobj["eventorigin"]=tablename;
         try
         {
@@ -168,7 +168,7 @@ DataBase.prototype={
         }
         catch(e)
         {
-            console.error(e);
+            console.error(e.toString());
             console.log("Error Commiting to database");
         }
         //save goes here
@@ -468,9 +468,26 @@ Util.prototype.read=function(tablename,columnname,offset)
    var result=[];
    var value=0;
 }
+
 Util.prototype.readColoumn=function(tablename,columnname)
 {
-
+  var self=this;
+  self.resultsbycolumns={};
+  if(columnname===undefined)
+  {
+    self.GetAll();
+  }
+  else
+  {
+    resultsbycolumns[columnname]=[];
+    self.onDataAdded=function()
+    {
+      this.results.forEach(function(res){
+        self.resultsbycolumns[columnname].push(res[columnname]);
+      });
+    }
+    self.GetAll();
+  }
 }
 Util.prototype.onDataAdded=function()
 {
