@@ -185,6 +185,15 @@ DataBase.prototype={
            console.log(data);
            util.add(data);
        }
+    },
+    onQuery:function()
+    {
+
+    },
+    Query:function(tablename,columnname,offset)
+    {
+        var util=new Util(this.dbname,tablename,this.version);
+
     }
 }
 

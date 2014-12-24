@@ -475,20 +475,27 @@ Util.prototype.readColoumn=function(tablename,columnname)
   self.resultsbycolumns={};
   if(columnname===undefined)
   {
+    self.onDataAdded=function()
+    {
+      self.results.forEach(function(r){
+        console.log(r);
+      });
+    }
     self.GetAll();
   }
   else
   {
-    resultsbycolumns[columnname]=[];
+    self.resultsbycolumns[columnname]=[];
     self.onDataAdded=function()
     {
-      this.results.forEach(function(res){
+      self.results.forEach(function(res){
         self.resultsbycolumns[columnname].push(res[columnname]);
       });
     }
     self.GetAll();
   }
 }
+
 Util.prototype.onDataAdded=function()
 {
   console.log(this.results);    

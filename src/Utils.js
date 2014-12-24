@@ -6,6 +6,7 @@ function Util(dbname,tablename,version)
     this.version=version;
     this.results=[];
     this.flag=false;
+    this.queried=[];
 }
 
 Util.prototype.add=function(data)
@@ -24,16 +25,27 @@ Util.prototype.add=function(data)
         var store=transaction.objectStore(tablename);
         store.put(datatobe);
     }
-}
+},
+Util.prototype.query=function()
+{
 
-Util.prototype.read=function(tablename,columnname,offset)
+},
+Util.prototype.read=function(tablename,columnname)
 {
    var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
    var request=indexDB.open(this.dbname,this.version);
    var tablename=this.tablename;
    var result=[];
    var value=0;
+   var self=this;
+   self.readColoumn(tablename,columnname);
+},
+
+Util.prototype.Condition=function(tablename,columnname)
+{
+  
 }
+
 
 Util.prototype.readColoumn=function(tablename,columnname)
 {
@@ -41,20 +53,27 @@ Util.prototype.readColoumn=function(tablename,columnname)
   self.resultsbycolumns={};
   if(columnname===undefined)
   {
+    self.onDataAdded=function()
+    {
+      self.results.forEach(function(r){
+        console.log(r);
+      });
+    }
     self.GetAll();
   }
   else
   {
-    resultsbycolumns[columnname]=[];
+    self.resultsbycolumns[columnname]=[];
     self.onDataAdded=function()
     {
-      this.results.forEach(function(res){
+      self.results.forEach(function(res){
         self.resultsbycolumns[columnname].push(res[columnname]);
       });
     }
     self.GetAll();
   }
 }
+
 Util.prototype.onDataAdded=function()
 {
   console.log(this.results);    
@@ -115,12 +134,10 @@ Util.prototype.isThere=function(id)
     setTimeout(function(){
       if(val.result!==undefined){
         self.flag=true;
-
       }
       else
       {
         self.flag=false;
-
       }
     },100);
 }
