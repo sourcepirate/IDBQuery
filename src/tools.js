@@ -80,10 +80,10 @@ Deferred.prototype = {
     console.log(args);
     while(i--) list[i].apply(null, args);
   },
-  resolve: function(){
+  resolve: function(arguments){
     this.execute(this._done, arguments);
   },
-  reject: function(){
+  reject: function(arguments){
     this.execute(this._fail, arguments);
   }, 
   done: function(callback){

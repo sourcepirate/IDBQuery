@@ -190,9 +190,15 @@ DataBase.prototype={
     getAll:function(tablename)
     {
         var table=this.getTable(tablename);
+        console.log("getting the table");
         console.log(table.properties);
+        table.properties.forEach(function(prop){
+            if(prop.hasOwnProperty('relation'))
+            {
+                console.log(prop.name);
+            }
+        });
     }
-   
 }
 
 ;function Property(name,type)
@@ -486,8 +492,6 @@ Util.prototype.Condition=function(tablename,columnname)
 {
     
 }
-
-
 Util.prototype.readColoumn=function(tablename,columnname)
 {
   var self=this;
@@ -583,7 +587,84 @@ Util.prototype.isThere=function(id)
     },100);
 }
 
-;function Iterator(list)
+Util.prototype.getObjects=function(tableobject,columnname)
+{
+  var self=this;
+  self.resultsbycolumns={};
+  var foreignkeys=tableobject.getForeignKeys();
+  if(columnname===undefined)
+  {
+    self.onDataAdded=function()
+    {
+      console.log("on channel event");
+      self.results.forEach(function(result){
+        console.log("under result ");
+         for(var key in result)
+         {
+            console.log(key);
+            for(var index in foreignkeys)
+            {
+                if(key in foreignkeys[index])
+               {
+               console.log(key + "is foreignkeys");
+               var tbl=new TableUtil(self.dbname,foreignkeys[index][key],self.version);
+               tbl.onGetObject=function(data){
+                result[key]=data;
+                console.log(result);
+               }
+               tbl.getObject(result[key]);
+               }
+            }
+         }
+      });
+    }
+    self.GetAll();
+  }
+  else
+  {
+    self.resultsbycolumns[columnname]=[];
+    self.onDataAdded=function()
+    {
+      
+    }
+    self.GetAll();
+  }
+}
+
+function TableUtil(dbname,tablename,version)
+{
+   this.dbname=dbname;
+   this.tablename=tablename;
+   this.version=version;
+
+}
+
+TableUtil.prototype={
+  onGetObject:function(data){
+    console.log(data);
+  },
+  getObject:function(id)
+  {
+     
+      this.indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+      this.request=this.indexDB.open(this.dbname,this.version);
+       var self=this;
+      self.request.onsuccess=function(event){
+        console.log("getting inside onsuccess event");
+      var db=event.target.result;
+      var transaction=db.transaction(self.tablename,"readwrite");
+      var store=transaction.objectStore(self.tablename);
+      self.val=store.get(id);
+    }
+     self.request.onerror=function(event){
+      console.log("error has occured");
+     }
+     setTimeout(function(){
+      console.log(self.val);
+      self.onGetObject(self.val.result);
+     },100);
+  }
+};function Iterator(list)
 {
 	this.list=list;
 	this.currentposition=0;
@@ -665,10 +746,10 @@ Deferred.prototype = {
     console.log(args);
     while(i--) list[i].apply(null, args);
   },
-  resolve: function(){
+  resolve: function(arguments){
     this.execute(this._done, arguments);
   },
-  reject: function(){
+  reject: function(arguments){
     this.execute(this._fail, arguments);
   }, 
   done: function(callback){

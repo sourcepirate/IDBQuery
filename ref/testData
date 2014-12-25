@@ -18,12 +18,14 @@ var newdump={
 db.addTable(newdump);
 db.addTable(dump);
 db.Initialize();
+
+db.Save("user",{user_id:1,username:"hello"});
+db.Save("person",{person_id:1,person_name:"hello",user_id:1});
+
 db.OnSave=function(event)
 {
 console.log(event.eventorigin);
 }
-db.Save("person",{person_id:1,person_name:"hello"});
-
 
 var db=new DataBase("test");
 db.addTable({
@@ -35,6 +37,8 @@ db.addTable({
 });
 db.Initialize();
 
-
-db.Save("user",{user_id:1,username:"hello"});
-db.Save("person",{person_id:1,person_name:"hehllo",user_id:1});
+var tbl=new TableUtil("testbase","user",2);
+tbl.onGetObject=function(event){
+   console.log(event);
+}
+tbl.getObject(1);

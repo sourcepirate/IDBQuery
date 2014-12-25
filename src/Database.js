@@ -190,7 +190,14 @@ DataBase.prototype={
     getAll:function(tablename)
     {
         var table=this.getTable(tablename);
+        console.log("getting the table");
         console.log(table.properties);
+        table.properties.forEach(function(prop){
+            if(prop.hasOwnProperty('relation'))
+            {
+                console.log(prop.name);
+            }
+        });
     }
 }
 
