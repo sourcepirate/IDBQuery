@@ -43,7 +43,7 @@ Util.prototype.read=function(tablename,columnname)
 
 Util.prototype.Condition=function(tablename,columnname)
 {
-  
+    
 }
 
 
@@ -141,3 +141,4 @@ Util.prototype.isThere=function(id)
       }
     },100);
 }
+

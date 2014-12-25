@@ -185,7 +185,14 @@ DataBase.prototype={
            console.log(data);
            util.add(data);
        }
+    },
+    
+    getAll:function(tablename)
+    {
+        var table=this.getTable(tablename);
+        console.log(table.properties);
     }
+   
 }
 
 ;function Property(name,type)
@@ -440,6 +447,7 @@ function Util(dbname,tablename,version)
     this.version=version;
     this.results=[];
     this.flag=false;
+    this.queried=[];
 }
 
 Util.prototype.add=function(data)
@@ -458,16 +466,27 @@ Util.prototype.add=function(data)
         var store=transaction.objectStore(tablename);
         store.put(datatobe);
     }
-}
+},
+Util.prototype.query=function()
+{
 
-Util.prototype.read=function(tablename,columnname,offset)
+},
+Util.prototype.read=function(tablename,columnname)
 {
    var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
    var request=indexDB.open(this.dbname,this.version);
    var tablename=this.tablename;
    var result=[];
    var value=0;
+   var self=this;
+   self.readColoumn(tablename,columnname);
+},
+
+Util.prototype.Condition=function(tablename,columnname)
+{
+    
 }
+
 
 Util.prototype.readColoumn=function(tablename,columnname)
 {
@@ -556,16 +575,82 @@ Util.prototype.isThere=function(id)
     setTimeout(function(){
       if(val.result!==undefined){
         self.flag=true;
-
       }
       else
       {
         self.flag=false;
-
       }
     },100);
 }
-;function Deferred(){
+
+;function Iterator(list)
+{
+	this.list=list;
+	this.currentposition=0;
+	var self=this;
+	if(self.list.hasOwnProperty('length'))
+	{
+		self.length=self.list.length-1;
+	}
+	else
+	{
+		self.list=[self.list];
+		self.length=0;
+	}
+}
+
+Iterator.prototype.hasNext=function()
+{
+	var self=this;
+	var flag=false;
+	if(self.list[self.currentposition+1]!==undefined && self.list[self.currentposition+1]!==null)
+	{
+		flag=true;
+	}
+	return flag;
+}
+
+Iterator.prototype.Next=function()
+{
+	var self=this;
+	var pos=self.currentposition;
+	self.currentposition=self.currentposition+1;
+	return self.list[pos];
+}
+
+Iterator.prototype.Prev=function()
+{
+	var self=this;
+	var pos=self.currentposition-1;
+	return self.list[pos];
+}
+
+Iterator.prototype.IterateOver=function(totalcallback,stepcallback)
+{
+	var self=this;
+	if(stepcallback==null ||stepcallback==undefined)
+		{
+			stepcallback=function(data){};
+		}
+	function closure()
+	{
+		stepcallback(self.list[self.currentposition]);
+		if(self.hasNext())
+		{
+			//do nothing
+                        self.Next();
+		}
+		else
+		{
+			totalcallback(self.list);
+		}
+	}
+	self.list.forEach(function(item){
+		closure();
+	});
+}
+
+function Deferred(){
   this._done = [];
   this._fail = [];
 }

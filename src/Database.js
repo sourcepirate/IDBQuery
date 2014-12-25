@@ -186,14 +186,11 @@ DataBase.prototype={
            util.add(data);
        }
     },
-    onQuery:function()
+    
+    getAll:function(tablename)
     {
-
-    },
-    Query:function(tablename,columnname,offset)
-    {
-        var util=new Util(this.dbname,tablename,this.version);
-
+        var table=this.getTable(tablename);
+        console.log(table.properties);
     }
 }
 
