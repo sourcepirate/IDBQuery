@@ -186,18 +186,16 @@ DataBase.prototype={
            util.add(data);
        }
     },
-    
-    getAll:function(tablename)
-    {
-        var table=this.getTable(tablename);
-        console.log("getting the table");
-        console.log(table.properties);
-        table.properties.forEach(function(prop){
-            if(prop.hasOwnProperty('relation'))
-            {
-                console.log(prop.name);
-            }
-        });
+
+    Query:function(tablename,type){
+        var self=this;
+        switch(type){
+            case "object":
+                   var util=new Util(self.dbname,tablename,self.version);
+                   var table=self.getTable(tablename);
+                   util.getObjects(table);
+                   break;
+        }
     }
 }
 
