@@ -186,18 +186,30 @@ DataBase.prototype={
            util.add(data);
        }
     },
-    
-    getAll:function(tablename)
-    {
-        var table=this.getTable(tablename);
-        console.log("getting the table");
-        console.log(table.properties);
-        table.properties.forEach(function(prop){
-            if(prop.hasOwnProperty('relation'))
-            {
-                console.log(prop.name);
-            }
-        });
+
+    Query:function(tablename,type,callback){
+        var self=this;
+        self.queryresult=[];
+        if(callback===undefined){callback=function(data){}}
+        switch(type){
+            case "object":
+                   var util=new Util(self.dbname,tablename,self.version);
+                   var table=self.getTable(tablename);
+                   util.getObjects(table,function(data){
+                    console.log("on get object callback");
+                    self.queryresult.push(data);
+                    callback(data);
+                   });
+                   break;
+            case "relation":
+                  var util=new Util(self.dbname,tablename,self.version);
+                  var table=self.getTable(tablename);
+                  util.getRelational(table,function(data){
+                    self.queryresult.push(data);
+                    callback(data);
+                  });
+                  break;
+        }
     }
 }
 
@@ -587,13 +599,16 @@ Util.prototype.isThere=function(id)
     },100);
 }
 
-Util.prototype.getObjects=function(tableobject,columnname)
+Util.prototype.getObjects=function(tableobject,callback,columnname)
 {
   var self=this;
   self.resultsbycolumns={};
   var foreignkeys=tableobject.getForeignKeys();
+  if(callback===undefined){callback=function(data){}}
   if(columnname===undefined)
   {
+    if(foreignkeys.length>0)
+    {
     self.onDataAdded=function()
     {
       console.log("on channel event");
@@ -610,13 +625,25 @@ Util.prototype.getObjects=function(tableobject,columnname)
                var tbl=new TableUtil(self.dbname,foreignkeys[index][key],self.version);
                tbl.onGetObject=function(data){
                 result[key]=data;
-                console.log(result);
+                self.queried.push(result);
+                callback(result);
                }
                tbl.getObject(result[key]);
                }
             }
          }
       });
+     }
+    }
+    else
+    {
+      self.onDataAdded=function()
+      {
+        self.results.forEach(function(result){
+           self.queried.push(result);
+           callback(result);
+        });
+      }
     }
     self.GetAll();
   }
@@ -625,12 +652,45 @@ Util.prototype.getObjects=function(tableobject,columnname)
     self.resultsbycolumns[columnname]=[];
     self.onDataAdded=function()
     {
-      
+
     }
     self.GetAll();
   }
 }
 
+Util.prototype.getRelational=function(tableobj,callback,columnname)
+{
+  var self=this;
+  self.queried=[];
+  if(callback===undefined){callback=function(data){}}
+  if(columnname===undefined)
+  {
+    self.onDataAdded=function()
+    {
+      console.log("got into on channel event");
+      self.results.forEach(function(result){
+        self.queried.push(result);
+        callback(result);
+      });
+    }
+        self.GetAll();
+  }
+  else
+  {
+
+  }
+}
+
+/*
+  End of Util Class
+*/
+
+
+
+
+/*
+   Table Util for high primitive table functions.
+*/
 function TableUtil(dbname,tablename,version)
 {
    this.dbname=dbname;

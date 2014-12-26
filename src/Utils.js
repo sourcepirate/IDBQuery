@@ -140,13 +140,16 @@ Util.prototype.isThere=function(id)
     },100);
 }
 
-Util.prototype.getObjects=function(tableobject,columnname)
+Util.prototype.getObjects=function(tableobject,callback,columnname)
 {
   var self=this;
   self.resultsbycolumns={};
   var foreignkeys=tableobject.getForeignKeys();
+  if(callback===undefined){callback=function(data){}}
   if(columnname===undefined)
   {
+    if(foreignkeys.length>0)
+    {
     self.onDataAdded=function()
     {
       console.log("on channel event");
@@ -164,13 +167,24 @@ Util.prototype.getObjects=function(tableobject,columnname)
                tbl.onGetObject=function(data){
                 result[key]=data;
                 self.queried.push(result);
-                console.log(result);
+                callback(result);
                }
                tbl.getObject(result[key]);
                }
             }
          }
       });
+     }
+    }
+    else
+    {
+      self.onDataAdded=function()
+      {
+        self.results.forEach(function(result){
+           self.queried.push(result);
+           callback(result);
+        });
+      }
     }
     self.GetAll();
   }
@@ -179,12 +193,45 @@ Util.prototype.getObjects=function(tableobject,columnname)
     self.resultsbycolumns[columnname]=[];
     self.onDataAdded=function()
     {
-      
+
     }
     self.GetAll();
   }
 }
 
+Util.prototype.getRelational=function(tableobj,callback,columnname)
+{
+  var self=this;
+  self.queried=[];
+  if(callback===undefined){callback=function(data){}}
+  if(columnname===undefined)
+  {
+    self.onDataAdded=function()
+    {
+      console.log("got into on channel event");
+      self.results.forEach(function(result){
+        self.queried.push(result);
+        callback(result);
+      });
+    }
+        self.GetAll();
+  }
+  else
+  {
+
+  }
+}
+
+/*
+  End of Util Class
+*/
+
+
+
+
+/*
+   Table Util for high primitive table functions.
+*/
 function TableUtil(dbname,tablename,version)
 {
    this.dbname=dbname;

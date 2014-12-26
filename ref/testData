@@ -22,6 +22,12 @@ db.Initialize();
 db.Save("user",{user_id:1,username:"hello"});
 db.Save("person",{person_id:1,person_name:"hello",user_id:1});
 
+
+db.Query("person","object",function(data){
+console.log(data);
+});
+
+
 db.OnSave=function(event)
 {
 console.log(event.eventorigin);

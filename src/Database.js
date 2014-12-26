@@ -187,14 +187,28 @@ DataBase.prototype={
        }
     },
 
-    Query:function(tablename,type){
+    Query:function(tablename,type,callback){
         var self=this;
+        self.queryresult=[];
+        if(callback===undefined){callback=function(data){}}
         switch(type){
             case "object":
                    var util=new Util(self.dbname,tablename,self.version);
                    var table=self.getTable(tablename);
-                   util.getObjects(table);
+                   util.getObjects(table,function(data){
+                    console.log("on get object callback");
+                    self.queryresult.push(data);
+                    callback(data);
+                   });
                    break;
+            case "relation":
+                  var util=new Util(self.dbname,tablename,self.version);
+                  var table=self.getTable(tablename);
+                  util.getRelational(table,function(data){
+                    self.queryresult.push(data);
+                    callback(data);
+                  });
+                  break;
         }
     }
 }
