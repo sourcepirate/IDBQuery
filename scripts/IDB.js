@@ -210,8 +210,21 @@ DataBase.prototype={
                   });
                   break;
         }
-    }
-}
+    },
+     get:function(tablename,primarykey,callback)
+     {
+        var self=this;
+        self.queryresult=[];
+        var tableutil=new TableUtil(self.dbname,tablename,self.version);
+        tableutil.onGetObject=function(data)
+        {
+            self.queryresult.push(data);
+            callback(data);
+        }
+        tableutil.getObject(primarykey);
+     }
+  }
+
 
 ;function Property(name,type)
 {
@@ -720,7 +733,6 @@ TableUtil.prototype={
       console.log("error has occured");
      }
      setTimeout(function(){
-      console.log(self.val);
       self.onGetObject(self.val.result);
      },100);
   }

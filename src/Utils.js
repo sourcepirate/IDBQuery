@@ -261,7 +261,6 @@ TableUtil.prototype={
       console.log("error has occured");
      }
      setTimeout(function(){
-      console.log(self.val);
       self.onGetObject(self.val.result);
      },100);
   }
