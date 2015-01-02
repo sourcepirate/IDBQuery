@@ -222,6 +222,23 @@ Util.prototype.getRelational=function(tableobj,callback,columnname)
   }
 }
 
+Util.prototype.Delete=function(tablename,primarykey)
+{
+    var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    var request=indexDB.open(this.dbname,this.version);
+    var self=this;
+
+    request.onsuccess=function(event){
+       var db=event.target.result;
+       var transaction=db.transaction(tablename,self.version);
+       var store=transaction.objectStore(tablename);
+       store.delete(primarykey);
+    }
+    request.onerror=function(event)
+    {
+        //the data has been deleted.
+    }
+}
 /*
   End of Util Class
 */
@@ -263,5 +280,15 @@ TableUtil.prototype={
      setTimeout(function(){
       self.onGetObject(self.val.result);
      },100);
+  },
+  onDeleteObj:function(data)
+  {
+
+  },
+  DeleteObj:function(id)
+  {
+    this.indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    this.request=this.indexDB.open(this.dbname,this.version);
+    var self=this;
   }
 }

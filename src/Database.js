@@ -227,7 +227,7 @@ DataBase.prototype={
             callback(data);
         }
         tableutil.getObject(primarykey);
-     }
+     },
     addListener:function(type,callback)
     {
         var self=this;
@@ -242,6 +242,27 @@ DataBase.prototype={
                 self.OnSave=callback;
                 break;
         }
+    },
+    Delete:function(tablename,primarykey,callback)
+    {
+        var self=this;
+        var util=new Util(self.dbname,tablename,self.version);
+        var data;
+        self.get(tablename, primarykey,function(dat){
+            data=dat;
+        });
+        callback(data);
+        var table=self.getTable(tablename);
+        var vals=[];
+        //var keys=table.foreignKeys;
+        var props=table.properties;
+        props.forEach(function(key){
+            if(key.hasOwnProperty('relation'))
+            {
+                vals.push(key);
+            }
+        });
+
     }
   }
 

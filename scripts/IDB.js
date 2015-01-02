@@ -18,6 +18,11 @@ function DataBase(dbname)
     /*
     Getting the database namelist and populating it and creating a database length
     */
+    /*
+       Adding Listeners.
+    */
+    self.Listeners={};
+    //
     this.createSchemas=function()
     {
         var Schema=self.tables;
@@ -211,7 +216,7 @@ DataBase.prototype={
                   break;
         }
     },
-     get:function(tablename,primarykey,callback)
+    get:function(tablename,primarykey,callback)
      {
         var self=this;
         self.queryresult=[];
@@ -222,7 +227,22 @@ DataBase.prototype={
             callback(data);
         }
         tableutil.getObject(primarykey);
-     }
+     },
+    addListener:function(type,callback)
+    {
+        var self=this;
+        var listener=self.Listeners[type];
+        if(listener==undefined)
+        {
+           self.Listeners[type]=callback;
+        }
+        switch(type)
+        {
+            case "save":
+                self.OnSave=callback;
+                break;
+        }
+    }
   }
 
 

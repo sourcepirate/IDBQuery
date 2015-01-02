@@ -97,5 +97,9 @@ Table.prototype={
             keycollection.push(obj);
         });
         return keycollection;
+    },
+    delete:function(utilobj,primarykey)
+    {
+        utilobj.delete(this.name,primarykey);
     }
 }
