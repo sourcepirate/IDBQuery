@@ -34,7 +34,7 @@ Table.prototype={
     	if(table.getPrimaryKey())
     	{
     		var t=Object.create(table.getPrimaryKey());
-    		t.relation="foreign";
+    		t.relation=table.name;
             t.complement=false;
             t.isAuto=false;
     		this.properties.push(t);

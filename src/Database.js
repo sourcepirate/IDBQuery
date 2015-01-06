@@ -94,6 +94,9 @@ DataBase.prototype={
     OnSave:function(event){
 
     },
+    OnDelete:function(event){
+
+    },
     getTable:function(name)
     {
         var table;
@@ -241,6 +244,9 @@ DataBase.prototype={
             case "save":
                 self.OnSave=callback;
                 break;
+            case "delete":
+                self.OnDelete=callback;
+                break;
         }
     },
     Delete:function(tablename,primarykey,callback)
@@ -253,16 +259,17 @@ DataBase.prototype={
         });
         callback(data);
         var table=self.getTable(tablename);
-        var vals=[];
+        var foriegns=[];
         //var keys=table.foreignKeys;
         var props=table.properties;
         props.forEach(function(key){
             if(key.hasOwnProperty('relation'))
             {
-                vals.push(key);
+                foriegns.push({key:key.relation});
+                cosole.log({key:key.relation});
             }
         });
-
+        var util=new Util(self.dbname,null,self.version);
     }
   }
 

@@ -94,6 +94,9 @@ DataBase.prototype={
     OnSave:function(event){
 
     },
+    OnDelete:function(event){
+
+    },
     getTable:function(name)
     {
         var table;
@@ -241,7 +244,33 @@ DataBase.prototype={
             case "save":
                 self.OnSave=callback;
                 break;
+            case "delete":
+                self.OnDelete=callback;
+                break;
         }
+    },
+    Delete:function(tablename,primarykey,callback)
+    {
+        var self=this;
+        var util=new Util(self.dbname,tablename,self.version);
+        var data;
+        self.get(tablename, primarykey,function(dat){
+            data=dat;
+        });
+        callback(data);
+        var table=self.getTable(tablename);
+        var foriegns=[];
+        //var keys=table.foreignKeys;
+        var props=table.properties;
+        props.forEach(function(key){
+            if(key.hasOwnProperty('relation'))
+            {
+                foriegns.push({key:key.relation});
+                cosole.log({key:key.relation});
+            }
+        });
+
+        var util=new Util(self.dbname,null,self.version);
     }
   }
 
@@ -426,7 +455,7 @@ Table.prototype={
     	if(table.getPrimaryKey())
     	{
     		var t=Object.create(table.getPrimaryKey());
-    		t.relation="foreign";
+    		t.relation=table.name;
             t.complement=false;
             t.isAuto=false;
     		this.properties.push(t);
@@ -489,6 +518,10 @@ Table.prototype={
             keycollection.push(obj);
         });
         return keycollection;
+    },
+    delete:function(utilobj,primarykey)
+    {
+        utilobj.delete(this.name,primarykey);
     }
 };
 function Util(dbname,tablename,version)
@@ -714,6 +747,23 @@ Util.prototype.getRelational=function(tableobj,callback,columnname)
   }
 }
 
+Util.prototype.Delete=function(tablename,primarykey)
+{
+    var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    var request=indexDB.open(this.dbname,this.version);
+    var self=this;
+
+    request.onsuccess=function(event){
+       var db=event.target.result;
+       var transaction=db.transaction(tablename,self.version);
+       var store=transaction.objectStore(tablename);
+       store.delete(primarykey);
+    }
+    request.onerror=function(event)
+    {
+        //the data has been deleted.
+    }
+}
 /*
   End of Util Class
 */
@@ -755,6 +805,16 @@ TableUtil.prototype={
      setTimeout(function(){
       self.onGetObject(self.val.result);
      },100);
+  },
+  onDeleteObj:function(data)
+  {
+
+  },
+  DeleteObj:function(id)
+  {
+    this.indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    this.request=this.indexDB.open(this.dbname,this.version);
+    var self=this;
   }
 };function Iterator(list)
 {
