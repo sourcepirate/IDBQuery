@@ -7,6 +7,7 @@ function Table(name)
 	this.foreignKeys=[];
     this.values=[];
     this.currentptr=0;
+    this.references=[];
 }
 
 Table.prototype={
@@ -33,6 +34,7 @@ Table.prototype={
     	{
     	if(table.getPrimaryKey())
     	{
+            table.references.push(this.name);
     		var t=Object.create(table.getPrimaryKey());
     		t.relation=table.name;
             t.complement=false;

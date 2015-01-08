@@ -27,6 +27,7 @@ db.Query("person","object",function(data){
 console.log(data);
 });
 
+db.Delete("user",1);
 
 db.OnSave=function(event)
 {

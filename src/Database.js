@@ -249,27 +249,46 @@ DataBase.prototype={
                 break;
         }
     },
-    Delete:function(tablename,primarykey,callback)
+    Delete:function(tablename,primarykey)
     {
         var self=this;
         var util=new Util(self.dbname,tablename,self.version);
         var data;
+        var foreigns;
+        var table=self.getTable(tablename);
+        function startBranchDelete()
+        {
+            var itemfrom=foreigns.tablename;
+            var itemarein=foreigns.relations;
+            var itemidis=foreigns.keyid;
+            
+            var itemskeynameis=self.getTable(itemfrom).getPrimaryKey().name;;
+
+            if(itemarein.length>0)
+            {
+                itemarein.forEach(function(item)
+                {
+                    var currenttableprimarykey=self.getTable(item).getPrimaryKey().name;
+                    self.Query(item,"relation",function(data){
+                        if(data[itemskeynameis]==itemidis)
+                        {
+                            util.Delete(item,data[currenttableprimarykey]);
+                            console.log("deleted");
+                            console.log(data);
+                        }
+                    });
+                });
+            }
+        }
         self.get(tablename, primarykey,function(dat){
             data=dat;
+            foreigns={tablename:tablename,relations:table.references,keyid:primarykey};
+            /*
+            deleting the record here.
+            */
+            util.Delete(tablename, primarykey);
+            startBranchDelete();
         });
-        callback(data);
-        var table=self.getTable(tablename);
-        var foriegns=[];
-        //var keys=table.foreignKeys;
-        var props=table.properties;
-        props.forEach(function(key){
-            if(key.hasOwnProperty('relation'))
-            {
-                foriegns.push({key:key.relation});
-                cosole.log({key:key.relation});
-            }
-        });
-        var util=new Util(self.dbname,null,self.version);
     }
   }
 
