@@ -775,14 +775,30 @@ Util.prototype.Delete=function(tablename,primarykey)
 
     request.onsuccess=function(event){
        var db=event.target.result;
-       var transaction=db.transaction(tablename,self.version);
+       var transaction=db.transaction(tablename,"readwrite");
        var store=transaction.objectStore(tablename);
+       console.log(typeof primarykey);
        store.delete(primarykey);
     }
     request.onerror=function(event)
     {
         //the data has been deleted.
     }
+}
+
+Util.prototype.DeleteRecord=function(tablename,primarykey)
+{
+  var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+  var request=indexDB.open(this.dbname,this.version);
+
+  request.onsuccess=function(event)
+  {
+
+  };
+  request.onerror=function(event)
+  {
+
+  }
 }
 /*
   End of Util Class
