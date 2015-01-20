@@ -23,6 +23,9 @@ db.Save("user",{user_id:1,username:"hello"});
 db.Save("person",{person_id:1,person_name:"hello",user_id:1});
 
 
+db.Save("user",{user_id:2,username:"plasmashadow"});
+db.Save("user",{user_id:3,username:"plasmashadowx"});
+
 db.Query("person","object",function(data){
 console.log(data);
 });
@@ -65,4 +68,6 @@ request.onsuccess=function(event){
 
 
 var util=new Util(db.dbname,null,db.version);
-util.SearchIndexWOC("user","username");
+util.SearchIndexWOC("user","username",function(data){
+  console.log(data);
+});

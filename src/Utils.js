@@ -242,7 +242,7 @@ Util.prototype.Delete=function(tablename,primarykey)
 }
 
 
-Util.prototype.SearchIndexWOC=function(tablename,indexname,callback)
+Util.prototype.Search=function(tablename,indexname,callback)
 {
   var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
   var request=indexDB.open(this.dbname,this.version);
@@ -255,11 +255,19 @@ Util.prototype.SearchIndexWOC=function(tablename,indexname,callback)
     index.openCursor().onsuccess=function(event)
     {
       var cursor=event.target.result;
+      if(cursor)
+      {
       var datastructure={
         key:cursor.key,
         object:cursor.value
       };
       callback(datastructure);
+      cursor.continue();
+      }
+      else
+      {
+        //donothing
+      }
     }
   }
   request.onerror=function(event)
@@ -268,14 +276,10 @@ Util.prototype.SearchIndexWOC=function(tablename,indexname,callback)
   }
 }
 
-Util.prototype.searchIndexWC=function(tablename,indexname,value,operation,callback)
+Util.prototype.getBy=function(tablename,indexname,keyvalue,callback)
 {
   var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
   var request=indexDB.open(this.dbname,this.version);
-  function validate_operator(operation)
-  {
-
-  }
   request.onsuccess=function(event)
   {
     var db=event.target.result;
@@ -285,17 +289,31 @@ Util.prototype.searchIndexWC=function(tablename,indexname,value,operation,callba
     index.openCursor().onsuccess=function(event)
     {
       var cursor=event.target.result;
+      if(cursor)
+      {
+      if(cursor.key==keyvalue)
+      {
       var datastructure={
         key:cursor.key,
-        value:cursor.value
+        object:cursor.value
       };
-      if(eval(cursor.key+operation+value))
+      callback(datastructure);
+      }
+      cursor.continue();
+      }
+      else
       {
-        callback(datastructure);
+        //do nothing
       }
     }
   }
+  request.onerror=function(event)
+  {
+    console.error("ERROR WHILE OPENING THE DATABASE FOR SEARCHING WITHOUT ANY CONDITION");
+  }
 }
+
+
 /*
   End of Util Class
 */
@@ -349,4 +367,17 @@ TableUtil.prototype={
     var self=this;
   }
 }
+
+
+function Condition()
+{
+  var self=this;
+  self.kwargs={};
+  self.args=arguments;
+}
+
+Condition.prototype={
+
+}
+
 

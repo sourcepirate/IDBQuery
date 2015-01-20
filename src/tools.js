@@ -93,3 +93,151 @@ Deferred.prototype = {
     this._fail.push(callback);
   }  
 }
+
+
+function Condition(value)
+{
+  var self=this;
+  self.value=value;
+}
+
+Condition.prototype={
+   
+   isLesserThan:function(val)
+   {
+    return this.val<val;
+   },
+
+   isGreaterThan:function(val)
+   {
+      return this.val>val;
+   },
+
+   isEqualto:function(val)
+   {
+      return this.value==val;
+   },
+
+   isGreaterAndEqual:function(val)
+   {
+      return this.value>=val;
+   },
+
+   isLesserAndEqual:function(val)
+   {
+     return this.value<=val;
+   },
+
+}
+
+
+function Collections()
+{
+	this.args=arguments;
+	this.sequence={};
+
+	this.sequence["gt"]=">";
+	this.sequence["lt"]="<";
+	this.sequence["ge"]=">=";
+	this.sequence["le"]="<=";
+	this.sequence["eq"]="==";
+
+}
+Collections.prototype={
+    
+    Max:function(field)
+    {
+       if(field!=undefined) 
+       	{
+       		return Math.max.apply(null,this.args[field]);
+       	}
+       else
+        {
+            return Math.max.apply(null,this.args);
+        }
+    },
+    Min:function(field)
+    {
+    	if(field!=undefined) 
+       	{
+       		return Math.min.apply(null,this.args[field]);
+       	}
+       else
+        {
+            return Math.min.apply(null,this.args);
+        }
+    },
+    Map:function(callback)
+    {
+    	var values=[];
+    	for(var i=0;i<this.args.length;i++)
+    	{
+    		values.push(callback(this.args[i]));
+     	}
+     	return values;
+    },
+    /*
+    For Object Collections
+    */
+    Pluck:function(fieldname)
+    {
+    	var values=[];
+    	this.args.forEach(function(arg){
+    		values.push(arg[fieldname]);
+    	});
+    	return values;
+    },
+    getBy:function(fieldname,conditiontype,value)
+    {
+    	var operation;
+    	if(this.sequence[conditiontype]!=undefined)
+    	{
+    		operation=this.sequence[conditiontype];
+    	}
+    	else
+    	{
+    		throw "Condition not Present";
+    	}
+    	var values=[];
+    	this.args.forEach(function(arg){
+    		if(eval(arg+operation+value))
+    		{
+    			values.push(arg);
+    		}
+    	});
+    	return values;
+    },
+
+}
+
+
+function Task(fn,params,flag)
+{
+   this.job=Object.create(fn);
+   this.job.started=false;
+   this.job.paused=false;
+   this.job.stopped=false;
+   this.arg=params
+   this.result=undefined;
+   this.isStarted=false;
+   this.isPaused=false;
+   this.isStopped=false;
+}
+
+Task.prototype={
+
+   execute:function(){
+   	this.job.apply(this,this.arg);
+   }
+}
+
+
+
+
+function SemaPhore(resource)
+{
+   this.resource=resources;
+   this.timeout=200;
+   this.Task=[];
+   this.activity={};
+}

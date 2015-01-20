@@ -807,11 +807,19 @@ Util.prototype.SearchIndexWOC=function(tablename,indexname,callback)
     index.openCursor().onsuccess=function(event)
     {
       var cursor=event.target.result;
+      if(cursor)
+      {
       var datastructure={
         key:cursor.key,
         object:cursor.value
       };
       callback(datastructure);
+      cursor.continue();
+      }
+      else
+      {
+        //donothing
+      }
     }
   }
   request.onerror=function(event)
@@ -846,6 +854,43 @@ Util.prototype.searchIndexWC=function(tablename,indexname,value,operation,callba
         callback(datastructure);
       }
     }
+  }
+}
+
+Util.prototype.getBy=function(tablename,indexname,keyvalue,callback)
+{
+  var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+  var request=indexDB.open(this.dbname,this.version);
+  request.onsuccess=function(event)
+  {
+    var db=event.target.result;
+    var transaction=db.transaction(tablename,"readwrite");
+    var store=transaction.objectStore(tablename);
+    var index=store.index(indexname);
+    index.openCursor().onsuccess=function(event)
+    {
+      var cursor=event.target.result;
+      if(cursor)
+      {
+      if(cursor.key==keyvalue)
+      {
+      var datastructure={
+        key:cursor.key,
+        object:cursor.value
+      };
+      callback(datastructure);
+      }
+      cursor.continue();
+      }
+      else
+      {
+        //do nothing
+      }
+    }
+  }
+  request.onerror=function(event)
+  {
+    console.error("ERROR WHILE OPENING THE DATABASE FOR SEARCHING WITHOUT ANY CONDITION");
   }
 }
 /*
