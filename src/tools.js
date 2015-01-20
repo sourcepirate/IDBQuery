@@ -211,23 +211,51 @@ Collections.prototype={
 }
 
 
-function Task(fn,params,flag)
+function Task(fn,params)
 {
    this.job=Object.create(fn);
    this.job.started=false;
    this.job.paused=false;
    this.job.stopped=false;
+   this.job.end=false;
    this.arg=params
    this.result=undefined;
-   this.isStarted=false;
-   this.isPaused=false;
-   this.isStopped=false;
 }
 
 Task.prototype={
 
    execute:function(){
-   	this.job.apply(this,this.arg);
+    this.job.apply(this,this.arg);
+    this.OnEnd();
+   },
+   OnEnd:function(){
+   	this.job.end=true;
+   },
+   Oncomplete:function(callback)
+   {
+   	this.job.end=true;
+   	callback();
+   },
+   checkOnComplete:function()
+   {
+   	 var flag=false;
+   	 while(true)
+   	 {
+   	 	
+   	 }
+   },
+   pause:function()
+   {
+   	this.job.paused=true;
+   },
+   stop:function()
+   {
+   	this.job.stopped=true;
+   },
+   start:function()
+   {
+   	this.job.started=true;
+   	this.execute();
    }
 }
 
@@ -238,6 +266,22 @@ function SemaPhore(resource)
 {
    this.resource=resources;
    this.timeout=200;
-   this.Task=[];
+   this.tasks=[];
    this.activity={};
+}
+
+SemaPhore.prototype={
+	addTask:function(fn,params)
+	{
+		var task=new Task(fn,params);
+		this.tasks.add(task);
+	},
+	start:function()
+	{
+		for(var task in tasks)
+		{
+			task.OnEnd()
+			task.execute();
+		}
+	}
 }
