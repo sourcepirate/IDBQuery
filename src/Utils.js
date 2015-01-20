@@ -241,18 +241,59 @@ Util.prototype.Delete=function(tablename,primarykey)
     }
 }
 
-Util.prototype.DeleteRecord=function(tablename,primarykey)
+
+Util.prototype.SearchIndexWOC=function(tablename,indexname,callback)
 {
   var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
   var request=indexDB.open(this.dbname,this.version);
-
   request.onsuccess=function(event)
   {
-
-  };
+    var db=event.target.result;
+    var transaction=db.transaction(tablename,"readwrite");
+    var store=transaction.objectStore(tablename);
+    var index=store.index(indexname);
+    index.openCursor().onsuccess=function(event)
+    {
+      var cursor=event.target.result;
+      var datastructure={
+        key:cursor.key,
+        object:cursor.value
+      };
+      callback(datastructure);
+    }
+  }
   request.onerror=function(event)
   {
+    console.error("ERROR WHILE OPENING THE DATABASE FOR SEARCHING WITHOUT ANY CONDITION");
+  }
+}
 
+Util.prototype.searchIndexWC=function(tablename,indexname,value,operation,callback)
+{
+  var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+  var request=indexDB.open(this.dbname,this.version);
+  function validate_operator(operation)
+  {
+
+  }
+  request.onsuccess=function(event)
+  {
+    var db=event.target.result;
+    var transaction=db.transaction(tablename,"readwrite");
+    var store=transaction.objectStore(tablename);
+    var index=store.index(indexname);
+    index.openCursor().onsuccess=function(event)
+    {
+      var cursor=event.target.result;
+      var datastructure={
+        key:cursor.key,
+        value:cursor.value
+      };
+      if(eval(cursor.key+operation+value))
+      {
+        callback(datastructure);
+      }
+    }
   }
 }
 /*
@@ -308,3 +349,4 @@ TableUtil.prototype={
     var self=this;
   }
 }
+

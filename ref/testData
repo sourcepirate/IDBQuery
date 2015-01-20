@@ -49,3 +49,20 @@ tbl.onGetObject=function(event){
    console.log(event);
 }
 tbl.getObject(1);
+
+var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+var request=indexDB.open("testbase",3);
+request.onsuccess=function(event){
+       var db=event.target.result;
+       var transaction=db.transaction("user",self.version);
+       var store=transaction.objectStore("user");
+       store.delete(1);
+    }
+    request.onerror=function(event)
+    {
+        //the data has been deleted.
+    }
+
+
+var util=new Util(db.dbname,null,db.version);
+util.SearchIndexWOC("user","username");

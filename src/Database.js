@@ -8,6 +8,8 @@ function DataBase(dbname)
     }
     self.version=2; //version is 2 if we want to override it we should user window.IDBDriver.version=desired value
     self.DB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+    window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
     //self.databases=[];
     self.dbname=dbname;
     /*
@@ -289,6 +291,11 @@ DataBase.prototype={
             util.Delete(tablename, primarykey);
             startBranchDelete();
         });
+    },
+
+    QueryColumn:function(table,columnname,conditon)
+    {
+
     }
   }
 
