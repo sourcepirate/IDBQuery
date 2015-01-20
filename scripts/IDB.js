@@ -794,7 +794,7 @@ Util.prototype.Delete=function(tablename,primarykey)
 }
 
 
-Util.prototype.SearchIndexWOC=function(tablename,indexname,callback)
+Util.prototype.Search=function(tablename,indexname,callback)
 {
   var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
   var request=indexDB.open(this.dbname,this.version);
@@ -825,35 +825,6 @@ Util.prototype.SearchIndexWOC=function(tablename,indexname,callback)
   request.onerror=function(event)
   {
     console.error("ERROR WHILE OPENING THE DATABASE FOR SEARCHING WITHOUT ANY CONDITION");
-  }
-}
-
-Util.prototype.searchIndexWC=function(tablename,indexname,value,operation,callback)
-{
-  var indexDB=window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-  var request=indexDB.open(this.dbname,this.version);
-  function validate_operator(operation)
-  {
-
-  }
-  request.onsuccess=function(event)
-  {
-    var db=event.target.result;
-    var transaction=db.transaction(tablename,"readwrite");
-    var store=transaction.objectStore(tablename);
-    var index=store.index(indexname);
-    index.openCursor().onsuccess=function(event)
-    {
-      var cursor=event.target.result;
-      var datastructure={
-        key:cursor.key,
-        value:cursor.value
-      };
-      if(eval(cursor.key+operation+value))
-      {
-        callback(datastructure);
-      }
-    }
   }
 }
 
@@ -893,6 +864,8 @@ Util.prototype.getBy=function(tablename,indexname,keyvalue,callback)
     console.error("ERROR WHILE OPENING THE DATABASE FOR SEARCHING WITHOUT ANY CONDITION");
   }
 }
+
+
 /*
   End of Util Class
 */
@@ -946,6 +919,19 @@ TableUtil.prototype={
     var self=this;
   }
 }
+
+
+function Condition()
+{
+  var self=this;
+  self.kwargs={};
+  self.args=arguments;
+}
+
+Condition.prototype={
+
+}
+
 
 ;function Iterator(list)
 {
@@ -1041,4 +1027,204 @@ Deferred.prototype = {
   fail: function(callback){
     this._fail.push(callback);
   }  
+}
+
+
+function Condition(value)
+{
+  var self=this;
+  self.value=value;
+}
+
+Condition.prototype={
+   
+   isLesserThan:function(val)
+   {
+    return this.val<val;
+   },
+
+   isGreaterThan:function(val)
+   {
+      return this.val>val;
+   },
+
+   isEqualto:function(val)
+   {
+      return this.value==val;
+   },
+
+   isGreaterAndEqual:function(val)
+   {
+      return this.value>=val;
+   },
+
+   isLesserAndEqual:function(val)
+   {
+     return this.value<=val;
+   },
+
+}
+
+
+function Collections()
+{
+	this.args=arguments;
+	this.sequence={};
+
+	this.sequence["gt"]=">";
+	this.sequence["lt"]="<";
+	this.sequence["ge"]=">=";
+	this.sequence["le"]="<=";
+	this.sequence["eq"]="==";
+
+}
+Collections.prototype={
+    
+    Max:function(field)
+    {
+       if(field!=undefined) 
+       	{
+       		return Math.max.apply(null,this.args[field]);
+       	}
+       else
+        {
+            return Math.max.apply(null,this.args);
+        }
+    },
+    Min:function(field)
+    {
+    	if(field!=undefined) 
+       	{
+       		return Math.min.apply(null,this.args[field]);
+       	}
+       else
+        {
+            return Math.min.apply(null,this.args);
+        }
+    },
+    Map:function(callback)
+    {
+    	var values=[];
+    	for(var i=0;i<this.args.length;i++)
+    	{
+    		values.push(callback(this.args[i]));
+     	}
+     	return values;
+    },
+    /*
+    For Object Collections
+    */
+    Pluck:function(fieldname)
+    {
+    	var values=[];
+    	this.args.forEach(function(arg){
+    		values.push(arg[fieldname]);
+    	});
+    	return values;
+    },
+    getBy:function(fieldname,conditiontype,value)
+    {
+    	var operation;
+    	if(this.sequence[conditiontype]!=undefined)
+    	{
+    		operation=this.sequence[conditiontype];
+    	}
+    	else
+    	{
+    		throw "Condition not Present";
+    	}
+    	var values=[];
+    	this.args.forEach(function(arg){
+    		if(eval(arg+operation+value))
+    		{
+    			values.push(arg);
+    		}
+    	});
+    	return values;
+    },
+
+}
+
+
+function Task(fn,params)
+{
+   this.fn=fn;	
+   this.job=Object.create(fn);
+   this.job.started=false;
+   this.job.paused=false;
+   this.job.stopped=false;
+   this.job.end=false;
+   this.arg=params
+   this.result=undefined;
+}
+
+Task.prototype={
+
+   execute:function(){
+    this.fn.apply(this,this.arg);
+    this.OnEnd();
+   },
+   OnEnd:function(){
+   	this.job.end=true;
+   },
+   Oncomplete:function(callback)
+   {
+   	this.job.end=true;
+   	callback();
+   },
+   checkOnComplete:function()
+   {
+   	 var flag=false;
+   	 while(true)
+   	 {
+   	 	
+   	 }
+   },
+   pause:function()
+   {
+   	this.job.paused=true;
+   },
+   stop:function()
+   {
+   	this.job.stopped=true;
+   },
+   start:function()
+   {
+   	this.job.started=true;
+   	this.execute();
+   }
+}
+
+
+
+
+function Thread()
+{
+   this.timeout=200;
+   this.tasks=[];
+   this.activity={};
+}
+
+Thread.prototype={
+	addTask:function(fn,params)
+	{
+		var task=new Task(fn,params);
+		this.tasks.push(task);
+	},
+	start:function()
+	{
+		var self=this;
+		for(var task in this.tasks)
+		{
+			
+			self.tasks[task].execute();
+			//used for locking the process till a process is completly finished.
+			while(true)
+			{
+			  if (this.tasks[task].job.end) {
+				break;
+			  }
+			}
+		}
+	}
 }

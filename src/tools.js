@@ -213,7 +213,7 @@ Collections.prototype={
 
 function Task(fn,params)
 {
-   this.job=Object.create(fn);
+   this.job=fn;
    this.job.started=false;
    this.job.paused=false;
    this.job.stopped=false;
@@ -262,9 +262,8 @@ Task.prototype={
 
 
 
-function SemaPhore(resource)
+function SemaPhore()
 {
-   this.resource=resources;
    this.timeout=200;
    this.tasks=[];
    this.activity={};
@@ -274,14 +273,23 @@ SemaPhore.prototype={
 	addTask:function(fn,params)
 	{
 		var task=new Task(fn,params);
-		this.tasks.add(task);
+		this.tasks.push(task);
 	},
 	start:function()
 	{
-		for(var task in tasks)
+		var self=this;
+		for(var task in this.tasks)
 		{
-			task.OnEnd()
-			task.execute();
+			
+			self.tasks[task].execute();
+			//used for locking the process till a process is completly finished.
+			while(true)
+			{
+			  if (this.tasks[task].job.end) {
+				break;
+			  }
+			}
 		}
-	}
+	},
+	
 }
