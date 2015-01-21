@@ -1148,8 +1148,7 @@ Collections.prototype={
 
 function Task(fn,params)
 {
-   this.fn=fn;	
-   this.job=Object.create(fn);
+   this.job=fn;
    this.job.started=false;
    this.job.paused=false;
    this.job.stopped=false;
@@ -1161,7 +1160,7 @@ function Task(fn,params)
 Task.prototype={
 
    execute:function(){
-    this.fn.apply(this,this.arg);
+    this.job.apply(this,this.arg);
     this.OnEnd();
    },
    OnEnd:function(){
@@ -1198,14 +1197,14 @@ Task.prototype={
 
 
 
-function Thread()
+function SemaPhore()
 {
    this.timeout=200;
    this.tasks=[];
    this.activity={};
 }
 
-Thread.prototype={
+SemaPhore.prototype={
 	addTask:function(fn,params)
 	{
 		var task=new Task(fn,params);
@@ -1226,5 +1225,6 @@ Thread.prototype={
 			  }
 			}
 		}
-	}
+	},
+	
 }
