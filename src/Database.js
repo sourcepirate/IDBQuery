@@ -291,11 +291,6 @@ DataBase.prototype={
             util.Delete(tablename, primarykey);
             startBranchDelete();
         });
-    },
-
-    QueryColumn:function(table,columnname,conditon)
-    {
-
     }
   }
 

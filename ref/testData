@@ -71,3 +71,26 @@ var util=new Util(db.dbname,null,db.version);
 util.SearchIndexWOC("user","username",function(data){
   console.log(data);
 });
+
+function a()
+{
+  var i=0;
+  while(i++<1000)
+  {
+   console.log(i);
+  }
+}
+
+function b()
+{
+  var i=0;
+  while(i++<2000)
+  {
+   console.log(i);
+  }
+}
+
+var thread=new Thread();
+thread.addTask(a,null);
+thread.addTask(b,null);
+thread.start();
