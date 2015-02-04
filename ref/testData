@@ -94,3 +94,7 @@ var thread=new Thread();
 thread.addTask(a,null);
 thread.addTask(b,null);
 thread.start();
+
+
+db.Filter("user_id","ge",2).GetResultSet();
+
